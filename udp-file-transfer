@@ -1,0 +1,106 @@
+#server side coding
+//
+//
+#include<iostream>
+using namespace std;
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<errno.h>
+#include<string.h>
+#include<arpa/inet.h>
+#define MAX 100;
+int main()
+{
+int sockmain,addrlength,msglength;
+struct sockaddr_in servaddr,clientaddr;
+char str[100],buf[100];
+sockmain=socket(AF_INET,SOCK_DGRAM,0);
+bzero(&servaddr,sizeof(servaddr));
+servaddr.sin_family=AF_INET;
+servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+servaddr.sin_port=0;  
+bind(sockmain,(struct sockaddr*)&servaddr,sizeof(servaddr));
+addrlength=sizeof(servaddr);
+getsockname(sockmain,(struct sockaddr *)&servaddr,(socklen_t*)&addrlength);
+cout<<"SERVER PORT: "<<ntohs(servaddr.sin_port)<<endl;
+ addrlength=sizeof(clientaddr);
+ bzero(str,100);
+msglength=recvfrom(sockmain,str,100,0,(struct sockaddr *)&servaddr,(socklen_t*)&addrlength);
+ str[strlen(str)]='\0';
+ cout<<str;
+ cin>>buf;
+ sendto(sockmain,buf,10,0,(struct sockaddr *)(&servaddr),sizeof(servaddr)); 
+ msglength=recvfrom(sockmain,buf,100,0,(struct sockaddr*)&servaddr,(socklen_t*)&addrlength);
+ buf[strlen(buf)]='\0'; 
+ cout<<"From client: "<<buf;
+}
+//
+//
+#client side coding
+//
+//
+#include<fstream>
+#include<iostream>
+using namespace std;
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<errno.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<arpa/inet.h>
+int main(int argc,char *argv[])
+{
+int sock,len;
+struct sockaddr_in servaddr,clientaddr;
+char str[100],file_name[20];
+FILE *fp;
+if((sock=socket(AF_INET,SOCK_DGRAM,0))<0)
+{
+cout<<endl<<"Client side socket creation failed";
+exit(1);
+}
+bzero((char *)&servaddr,sizeof(servaddr));
+servaddr.sin_family=AF_INET;
+servaddr.sin_port=htons(atoi(argv[2]));
+if(inet_pton(AF_INET,argv[1],&servaddr.sin_addr)<=0)
+{
+cout<<endl<<"IP Conversion failed";
+exit(1);
+}
+bzero((char *)&clientaddr,sizeof(clientaddr));
+clientaddr.sin_family=AF_INET;
+clientaddr.sin_addr.s_addr=htons(INADDR_ANY);
+clientaddr.sin_port=0;
+if(bind(sock,(struct sockaddr*)&clientaddr,sizeof(clientaddr))<0)
+{
+ cout<<"Client cannot get a port";
+ exit(0);
+} 
+strcpy(str,"Enter file name : "); 
+sendto(sock,str,100,0,(struct sockaddr *)(&servaddr),sizeof(servaddr));
+recvfrom(sock,file_name,100,0,(struct sockaddr *)&servaddr,(socklen_t*)&len);
+cout<<"File name: "<<file_name<<"\n";
+fp=fopen(file_name,"r");
+if(fp<=0)
+{
+ bzero(str,100);
+ strcpy(str,"File doesn't exists\0");
+sendto(sock,str,100,0,(struct sockaddr *)(&servaddr),sizeof(servaddr));
+ exit(0);
+}
+else
+{
+ fread(str,1,100,fp);
+sendto(sock,str,100,0,(struct sockaddr *)(&servaddr),sizeof(servaddr));
+ cout<<endl<<"Client: "<<str;
+}
+}
