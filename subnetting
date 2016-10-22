@@ -1,0 +1,78 @@
+#include<stdio.h>
+int main()
+{
+int subnetpart,i,temp,temp1,j=0;
+int subnetid[255];
+struct ipaddress
+{
+int part1;
+int part2;
+int part3;
+int part4;
+}ip;
+struct subnetmask
+{
+int part1;
+int part2;
+int part3;
+int part4;
+}mask;
+void getipinput()
+{
+printf("Enter part1 value: ");
+scanf("%d",&ip.part1);
+printf("Enter part2 value: ");
+scanf("%d",&ip.part2);
+printf("Enter part3 value: ");
+scanf("%d",&ip.part3);
+printf("Enter part4 value: ");
+scanf("%d",&ip.part4);
+}
+void getmaskinput()
+{
+printf("Enter part1 value: ");
+scanf("%d",&mask.part1);
+printf("Enter part2 value: ");
+scanf("%d",&mask.part2);
+printf("Enter part3 value: ");
+scanf("%d",&mask.part3);
+printf("Enter part4 value: ");
+scanf("%d",&mask.part4);
+}
+printf("Enter ip address\n");
+getipinput();
+printf("Enter subnet mask address\n");
+getmaskinput();
+printf("\nIp address : %d.%d.%d.%d",ip.part1,ip.part2,ip.part3,ip.part4);
+printf("\nSubnet mask : %d.%d.%d.%d",mask.part1,mask.part2,mask.part3,mask.part4);
+for(i=0;i<255;i++)
+  subnetid[i]=0;
+for(i=0;i<1;i++)
+{
+j=1;
+if(mask.part2!=255) {
+subnetpart=j+1;
+printf("Subnet part :%d",subnetpart);
+break;
+}
+if(mask.part3!=255) {
+subnetpart=j+2;
+printf("Subnet part :%d",subnetpart);
+break;
+}
+if(mask.part4!=255)  {
+subnetpart=j+3;
+printf("Subnet part :%d",subnetpart);
+break;
+} }
+j=0;
+for(i=0;i<255;i++) {
+temp=i&mask.part4;
+if(temp!=subnetid[j]&&temp!=subnetid[j-1]) {
+  subnetid[j]=temp;
+  j=j+1;
+} }
+printf("Subnet of %d.%d.%d.%d  Ip address with the %d.%d.%d.%d  subnet mask :\n",ip.part1,ip.part2,ip.part3,ip.part4,mask.part1,mask.part2,mask.part3,mask.part4);
+for(i=0;i<j;i++) {
+printf("Subnet id %d: %d.%d.%d.%d\n",i,ip.part1,ip.part2,ip.part3,subnetid[i]);
+} }
