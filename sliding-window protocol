@@ -1,0 +1,117 @@
+#server side coding 
+//
+//
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<arpa/inet.h>
+int main(int argc,char **argv)
+{
+int socketmain,socketclient,child,port=5117,len=81,n, expectedframe=0;
+char late_ack;
+struct sockaddr_in serv,clientaddr;
+socklen_t clientlen;
+if((socketmain=socket(AF_INET,SOCK_STREAM,0))<0)
+ {
+printf("\n server cannot open socket");
+exit(0);
+}
+bzero(&serv,sizeof(serv));
+serv.sin_family=AF_INET;
+serv.sin_addr.s_addr=htonl(INADDR_ANY);
+serv.sin_port=htons(atoi(argv[1]));
+if((bind(socketmain,(struct sockaddr*)&serv,sizeof(serv)))<0)
+{
+printf("\n server bind failed");
+exit(1);
+}
+listen(socketmain,5);
+if((socketclient=accept(socketmain,(struct sockaddr*)&clientaddr,&clientlen))<0)
+{
+printf("\n client is bad");
+exit(0);
+}
+char buf[len];
+char str[10],frameno[]="012345678";
+bzero(buf,len);
+printf("FRAME NO        DATA");
+while(expectedframe<=8)
+{
+n=read(socketclient,buf,2);
+ printf("\n%c \t\t  %c", buf[0], buf[1]);
+write(socketclient,buf,2);
+}}
+//
+//
+#client side coding
+//
+//
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<arpa/inet.h>
+int main(int argc,char **argv)
+{
+int sockfd,n,port=5222, sentframe=-1, cong_window;
+struct sockaddr_in serv;
+char buf[100],msg[100];
+if(argc!=3)
+{
+printf("invalid format");
+exit(0);
+}
+if((sockfd=socket(AF_INET,SOCK_STREAM,0))<0)
+{
+printf("\n socket cannot be opened");
+exit(0);
+}
+bzero(&serv,sizeof(serv));
+serv.sin_family=AF_INET;
+serv.sin_port=htons(atoi(argv[2]));
+if(connect(sockfd,(struct sockaddr*)&serv,sizeof(serv))<0)
+{
+printf("\n connection failed");
+exit(0);
+}
+printf("\n connected with the server......\n\n");
+char error='\0';
+char framelost='\0';
+char acklost='\0';
+char timeframe='\0';
+char DATA[]="ABCDEFGHI";
+char frameno[]="012345678";
+int flag1=1, flag2=1;
+printf("FRAME NO        DATA\n");
+while(sentframe<8)
+{cong_window=1;
+while(cong_window<4){
+sentframe++;
+cong_window++;
+buf[0]=frameno[sentframe];
+buf[1]=DATA[sentframe];
+printf("%c    \t \t  %c\n",buf[0], buf[1]);
+
+write(sockfd,buf,2);
+}
+sleep(4);
+cong_window=1;
+while(cong_window<4){
+cong_window++;
+if((n=read(sockfd,buf,2))!=0)
+{	
+	if(buf[0]<=frameno[sentframe])
+		printf("Received Acknowledgement : %c       %c\n",buf[0], buf[1]);
+	
+}
+}}
+}
