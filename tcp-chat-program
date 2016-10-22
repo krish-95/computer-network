@@ -1,0 +1,91 @@
+#server side coding
+//
+//
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<arpa/inet.h>
+int main()
+{
+int socketmain,socketclient,child,port=5222,len=81;
+struct sockaddr_in serv,clientaddr;
+socklen_t clientlen;
+if((socketmain=socket(AF_INET,SOCK_STREAM,0))<0)
+{   printf("\n server cant open socket");
+     exit(0);  }
+bzero(&serv,sizeof(serv));
+serv.sin_family=AF_INET;
+serv.sin_addr.s_addr=htonl(INADDR_ANY);
+serv.sin_port=htons(port);
+if((bind(socketmain,(struct sockaddr*)&serv,sizeof(serv)))<0)
+{   printf("\n server bind failed");
+    exit(1);   }
+listen(socketmain,5);
+if((socketclient=accept(socketmain,(struct sockaddr*)&clientaddr,&clientlen))<0)
+{
+printf("\n client is bad");
+exit(0);
+}
+char buf[len];
+char str[10],j[10];
+bzero(buf,len);
+while(strcmp(str,"bye")!=0)
+{
+int n=read(socketclient,buf,100);
+printf("\n msg is %s",buf);
+scanf("%s",str);
+strcpy(buf,str);
+write(socketclient,buf,100);
+}}
+//
+//
+#client side coding
+//
+//
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<netdb.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<arpa/inet.h>
+int main(int argc,char **argv)
+{
+int sockfd,n,port=5222;
+struct sockaddr_in serv;
+char buf[100],msg[100];
+if(argc!=3)
+{
+printf("\n invalid format");
+exit(0);
+}
+if((sockfd=socket(AF_INET,SOCK_STREAM,0))<0)
+{
+printf("\n socket can’t be opened");
+exit(0);
+}
+bzero(&serv,sizeof(serv));
+serv.sin_family=AF_INET;
+serv.sin_port=htons(atoi(argv[2]));
+if(connect(sockfd,(struct sockaddr*)&serv,sizeof(serv))<0)
+{
+printf("\n connection failed");
+exit(0);
+}
+char i[100];
+printf("\n connected");
+while(buf!="bye")
+{
+printf("\n msg");
+scanf("%s",buf);
+write(sockfd,buf,100);
+n=read(sockfd,msg,100);
+printf("\n balu %s",msg);
+}}
